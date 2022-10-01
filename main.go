@@ -4,16 +4,14 @@ import (
 	"flag"
 	"fmt"
 	"os"
-)
 
-func handleAuth(authCmd *flag.FlagSet) {
-	fmt.Println("AuthCommand activated, logging in to google")
-}
+	"you-up/controller"
+)
 
 func main() {
 
 	//'you-up auth' subcommand
-	authCmd := flag.NewFlagSet("auth", flag.ExitOnError)
+	flag.NewFlagSet("auth", flag.ExitOnError)
 
 	if len(os.Args) < 2 {
 		fmt.Println("expected 'get' or 'add' subcommands")
@@ -23,7 +21,7 @@ func main() {
 	//look at the 2nd argument's value
 	switch os.Args[1] {
 	case "auth": // if its the 'get' command
-		handleAuth(authCmd)
+		controller.GoogleLogin()
 	default: // if we don't understand the input
 	}
 
