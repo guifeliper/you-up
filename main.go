@@ -24,6 +24,8 @@ func main() {
 		controller.GoogleLogin()
 	case "get":
 		controller.GetChannelByUsername()
+	case "upload":
+		controller.UploadVideo()
 
 	default: // if we don't understand the input
 	}
