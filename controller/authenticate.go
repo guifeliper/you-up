@@ -124,7 +124,7 @@ func authenticate() *http.Client {
 		log.Fatalf("Unable to read client secret file: %v", err)
 	}
 
-	config, err := google.ConfigFromJSON(b, youtube.YoutubeReadonlyScope)
+	config, err := google.ConfigFromJSON(b, youtube.YoutubeUploadScope)
 	if err != nil {
 		log.Fatalf("Unable to parse client secret file to config: %v", err)
 	}
@@ -167,7 +167,6 @@ func upload(service *youtube.Service) {
 		upload.Snippet.Tags = strings.Split(*keywords, ",")
 	}
 
-	// parts := []string{"snippet,status"}
 	var parts []string
 	parts = append(parts, "snippet")
 	parts = append(parts, "status")
@@ -181,7 +180,8 @@ func upload(service *youtube.Service) {
 
 	response, err := call.Media(file).Do()
 	handleError(err, "")
-	fmt.Printf("Upload successful! Video ID: %v\n", response.Id)
+	url := "https://www.youtube.com/watch?v=" + response.Id
+	fmt.Printf("Upload successful! Video ID: %v\n", url)
 }
 
 func GoogleLogin() {
