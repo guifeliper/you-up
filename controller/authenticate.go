@@ -27,7 +27,7 @@ Please configure OAuth 2.0
 `
 
 var (
-	filename    = flag.String("filename", "./assets/sample_video.mp4", "Name of video file to upload")
+	filename    = flag.String("filename", "", "Name of video file to upload")
 	title       = flag.String("title", "Test Title", "Video title")
 	description = flag.String("description", "Test Description", "Video description")
 	category    = flag.String("category", "22", "Video category")
