@@ -4,7 +4,6 @@ package controller
 
 import (
 	"encoding/json"
-	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -14,25 +13,11 @@ import (
 	"os/exec"
 	"os/user"
 	"path/filepath"
-	"strings"
 
 	"golang.org/x/net/context"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/youtube/v3"
-)
-
-const missingClientSecretsMessage = `
-Please configure OAuth 2.0
-`
-
-var (
-	filename    = flag.String("filename", "", "Name of video file to upload")
-	title       = flag.String("title", "Test Title", "Video title")
-	description = flag.String("description", "Test Description", "Video description")
-	category    = flag.String("category", "22", "Video category")
-	keywords    = flag.String("keywords", "", "Comma separated list of video keywords")
-	privacy     = flag.String("privacy", "unlisted", "Video privacy status")
 )
 
 // getClient uses a Context and Config to retrieve a Token
@@ -133,72 +118,7 @@ func authenticate() *http.Client {
 	return client
 }
 
-func channelsListByUsername(service *youtube.Service, part string, forUsername string) {
-	parts := []string{part}
-	call := service.Channels.List(parts)
-	call = call.ForUsername(forUsername)
-	response, err := call.Do()
-	handleError(err, "")
-	fmt.Println(fmt.Sprintf("This channel's ID is %s. Its title is '%s', "+
-		"and it has %d views.",
-		response.Items[0].Id,
-		response.Items[0].Snippet.Title,
-		response.Items[0].Statistics.ViewCount))
-}
-
-func upload(service *youtube.Service) {
-	flag.Parse()
-
-	if *filename == "" {
-		log.Fatalf("You must provide a filename of a video file to upload")
-	}
-
-	upload := &youtube.Video{
-		Snippet: &youtube.VideoSnippet{
-			Title:       *title,
-			Description: *description,
-			CategoryId:  *category,
-		},
-		Status: &youtube.VideoStatus{PrivacyStatus: *privacy},
-	}
-
-	// The API returns a 400 Bad Request response if tags is an empty string.
-	if strings.Trim(*keywords, "") != "" {
-		upload.Snippet.Tags = strings.Split(*keywords, ",")
-	}
-
-	var parts []string
-	parts = append(parts, "snippet")
-	parts = append(parts, "status")
-	call := service.Videos.Insert(parts, upload)
-
-	file, err := os.Open(*filename)
-	defer file.Close()
-	if err != nil {
-		log.Fatalf("Error opening %v: %v", *filename, err)
-	}
-
-	response, err := call.Media(file).Do()
-	handleError(err, "")
-	url := "https://www.youtube.com/watch?v=" + response.Id
-	fmt.Printf("Upload successful! Video ID: %v\n", url)
-}
-
 func GoogleLogin() {
 	authenticate()
 	fmt.Println("Google user authenticate with success!")
-}
-
-func GetChannelByUsername() {
-	client := authenticate()
-	service, err := youtube.New(client)
-	handleError(err, "Error creating YouTube client")
-	channelsListByUsername(service, "snippet,contentDetails,statistics", "GoogleDevelopers")
-}
-
-func UploadVideo() {
-	client := authenticate()
-	service, err := youtube.New(client)
-	handleError(err, "Error creating YouTube client")
-	upload(service)
 }

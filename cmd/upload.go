@@ -4,7 +4,7 @@ Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"fmt"
+	"you-up/controller"
 
 	"github.com/spf13/cobra"
 )
@@ -21,8 +21,10 @@ var uploadCmd = &cobra.Command{
 		category, _ := cmd.Flags().GetString("category")
 		keywords, _ := cmd.Flags().GetString("keywords")
 		privacy, _ := cmd.Flags().GetString("privacy")
-		fmt.Println(filename, title, description, category, keywords, privacy)
-		// controller.UploadVideo()
+
+		video := controller.NewVideo(filename, title, description, category, keywords, privacy)
+
+		controller.UploadVideo(video)
 	},
 }
 
