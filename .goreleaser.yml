@@ -1,0 +1,32 @@
+builds:
+  - binary: you-up
+    goos:
+      - darwin
+      - linux
+    goarch:
+      - amd64
+      - arm64
+    env:
+      - CGO_ENABLED=0
+    flags:
+      - -mod=vendor
+
+release:
+  prerelease: auto
+
+universal_binaries:
+  - replace: true
+
+# brews:
+#   -
+#     name: you-up
+#     homepage: https://github.com/guifeliper/you-up
+#     tap:
+#       owner: guifeliper
+#       name: homebrew-guifeliper
+#     commit_author:
+#       name: guifeliper
+#       email: guifeliper@gmail.com
+
+checksum:
+  name_template: 'checksums.txt'
