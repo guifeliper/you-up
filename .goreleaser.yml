@@ -17,16 +17,16 @@ release:
 universal_binaries:
   - replace: true
 
-# brews:
-#   -
-#     name: you-up
-#     homepage: https://github.com/guifeliper/you-up
-#     tap:
-#       owner: guifeliper
-#       name: homebrew-guifeliper
-#     commit_author:
-#       name: guifeliper
-#       email: guifeliper@gmail.com
+brews:
+  -
+    name: you-up
+    homepage: https://github.com/guifeliper/you-up
+    tap:
+      owner: guifeliper
+      name: homebrew-you-up
+    commit_author:
+      name: guifeliper
+      email: guifeliper@gmail.com
 
 checksum:
   name_template: 'checksums.txt'
