@@ -11,7 +11,6 @@ import (
 	"net/url"
 	"os"
 	"os/exec"
-	"os/user"
 	"path/filepath"
 
 	"golang.org/x/net/context"
@@ -23,10 +22,7 @@ import (
 // getClient uses a Context and Config to retrieve a Token
 // then generate a Client. It returns the generated Client.
 func getClient(ctx context.Context, config *oauth2.Config) *http.Client {
-	cacheFile, err := tokenCacheFile()
-	if err != nil {
-		log.Fatalf("Unable to get path to cached credential file. %v", err)
-	}
+	cacheFile := tokenCacheFile()
 	tok, err := tokenFromFile(cacheFile)
 	if err != nil {
 		tok = getTokenFromWeb(config)
@@ -56,15 +52,12 @@ func getTokenFromWeb(config *oauth2.Config) *oauth2.Token {
 
 // tokenCacheFile generates credential file path/filename.
 // It returns the generated credential path/filename.
-func tokenCacheFile() (string, error) {
-	usr, err := user.Current()
-	if err != nil {
-		return "", err
-	}
-	tokenCacheDir := filepath.Join(usr.HomeDir, ".credentials")
+func tokenCacheFile() string {
+	usrHomeDir := GetHomeDir()
+	tokenCacheDir := filepath.Join(usrHomeDir, ".credentials")
 	os.MkdirAll(tokenCacheDir, 0700)
 	return filepath.Join(tokenCacheDir,
-		url.QueryEscape("youtube-go-quickstart.json")), err
+		url.QueryEscape("google.json"))
 }
 
 // tokenFromFile retrieves a Token from a given file path.
@@ -92,6 +85,25 @@ func saveToken(file string, token *oauth2.Token) {
 	json.NewEncoder(f).Encode(token)
 }
 
+func saveClientSecret(sourceFile string) {
+	// Set all variables
+	usrHomeDir := GetHomeDir()
+	tokenCacheDir := filepath.Join(usrHomeDir, ".credentials")
+	destinationFile := tokenCacheDir + "/client_secret.json"
+
+	// Make Directory
+	os.MkdirAll(tokenCacheDir, 0700)
+
+	//Read the file
+	input, err := ioutil.ReadFile(sourceFile)
+	handleError(err, "Cannot read the file")
+
+	// Save the file
+	err = ioutil.WriteFile(destinationFile, input, 0644)
+	handleError(err, "Error creating "+destinationFile)
+
+}
+
 func handleError(err error, message string) {
 	if message == "" {
 		message = "Error making API call"
@@ -103,8 +115,9 @@ func handleError(err error, message string) {
 
 func authenticate() *http.Client {
 	ctx := context.Background()
-
-	b, err := ioutil.ReadFile("client_secret.json")
+	usrHomeDir := GetHomeDir()
+	clientSecretFile := filepath.Join(usrHomeDir, ".credentials", "client_secret.json")
+	b, err := ioutil.ReadFile(clientSecretFile)
 	if err != nil {
 		log.Fatalf("Unable to read client secret file: %v", err)
 	}
@@ -121,4 +134,9 @@ func authenticate() *http.Client {
 func GoogleLogin() {
 	authenticate()
 	fmt.Println("Google user authenticate with success!")
+}
+
+func GoogleFirstLogin(sourceFile string) {
+	saveClientSecret(sourceFile)
+	GoogleLogin()
 }
