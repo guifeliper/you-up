@@ -119,7 +119,7 @@ func authenticate() *http.Client {
 	clientSecretFile := filepath.Join(usrHomeDir, ".credentials", "client_secret.json")
 	b, err := ioutil.ReadFile(clientSecretFile)
 	if err != nil {
-		log.Fatalf("Unable to read client secret file: %v", err)
+		log.Fatalf("Unable to read client secret file: %v, \n\nPlease login with: you-up auth -f <<Google Client secret file>>", err)
 	}
 
 	config, err := google.ConfigFromJSON(b, youtube.YoutubeUploadScope)
