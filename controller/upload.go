@@ -1,7 +1,9 @@
 package controller
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"strings"
@@ -10,12 +12,12 @@ import (
 )
 
 type Video struct {
-	Filename    string
-	Title       string
-	Description string
-	Category    string
-	Keywords    string
-	Privacy     string
+	Filename    string `json: "filename"`
+	Title       string `json: "title"`
+	Description string `json: "description"`
+	Category    string `json: "category"`
+	Keywords    string `json: "keywords"`
+	Privacy     string `json: "privacy"`
 }
 
 func upload(service *youtube.Service, video *Video) {
@@ -54,10 +56,23 @@ func UploadVideo(video *Video) {
 	service, err := youtube.New(client)
 	handleError(err, "Error creating YouTube client")
 	upload(service, video)
-	// fmt.Println(video, video.Filename)
 }
 
 func NewVideo(filename string, title string, description string, category string, keywords string, privacy string) *Video {
 	v := Video{Filename: filename, Title: title, Description: description, Category: category, Keywords: keywords, Privacy: privacy}
 	return &v
+}
+
+func BulkUpload(filename string) {
+	file, _ := ioutil.ReadFile(filename)
+
+	data := []Video{}
+
+	_ = json.Unmarshal([]byte(file), &data)
+
+	for i := 0; i < len(data); i++ {
+		fmt.Println("Uploading " + data[i].Title + "...")
+		video := NewVideo(data[i].Filename, data[i].Title, data[i].Description, data[i].Category, data[i].Keywords, data[i].Privacy)
+		UploadVideo(video)
+	}
 }

@@ -4,6 +4,7 @@ Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"log"
 	"you-up/controller"
 
 	"github.com/spf13/cobra"
@@ -21,10 +22,19 @@ var uploadCmd = &cobra.Command{
 		category, _ := cmd.Flags().GetString("category")
 		keywords, _ := cmd.Flags().GetString("keywords")
 		privacy, _ := cmd.Flags().GetString("privacy")
+		multiple, _ := cmd.Flags().GetBool("multiple")
 
-		video := controller.NewVideo(filename, title, description, category, keywords, privacy)
+		if multiple {
+			controller.BulkUpload(filename)
+		} else {
+			if title != "" {
+				video := controller.NewVideo(filename, title, description, category, keywords, privacy)
+				controller.UploadVideo(video)
+			} else {
+				log.Fatalf("Title is not provided")
+			}
+		}
 
-		controller.UploadVideo(video)
 	},
 }
 
@@ -35,10 +45,10 @@ func init() {
 	uploadCmd.Flags().StringP("filename", "f", "", "Name of video file to upload (required)")
 	uploadCmd.MarkFlagRequired("filename")
 	uploadCmd.Flags().StringP("title", "t", "", "Name of video file to upload (required)")
-	uploadCmd.MarkFlagRequired("title")
 	uploadCmd.Flags().String("description", "", "Video description")
 	uploadCmd.Flags().String("category", "", "Video category")
 	uploadCmd.Flags().String("keywords", "", "Comma separated list of video keywords")
 	uploadCmd.Flags().String("privacy", "unlisted", "Video privacy status")
+	uploadCmd.Flags().BoolP("multiple", "m", false, "Upload several video using a JSON file")
 
 }
