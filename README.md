@@ -45,6 +45,26 @@ and you are done to upload videos.
 you-up upload -f "./assets/sample_video.mp4" -t "testing auth"
 ```
 
+#### Bulk upload 
+
+```
+you-up upload -f ./upload.json -m true
+```
+where the json file is equal to:
+```
+[
+    {
+        "title": "My video uploaded by json",
+        "filename": "./assets/sample_video.mp4"
+    },
+    {
+        "title": "My video uploaded by json 2",
+        "filename": "./assets/sample_video_2.mp4",
+        "description": "Hello this is a video uploaded via you-up."
+    }
+]
+```
+
 ## Dev Environment
 
 ```
