@@ -42,7 +42,7 @@ and you are done to upload videos.
 ### Upload videos 
 
 ```
-you-up upload -f "./assets/sample_video.mp4" -t "testing auth"
+you-up upload -f "./data/sample_video.mp4" -t "testing auth"
 ```
 
 #### Bulk upload 
@@ -55,11 +55,11 @@ where the json file is equal to:
 [
     {
         "title": "My video uploaded by json",
-        "filename": "./assets/sample_video.mp4"
+        "filename": "./data/sample_video.mp4"
     },
     {
         "title": "My video uploaded by json 2",
-        "filename": "./assets/sample_video_2.mp4",
+        "filename": "./data/sample_video_2.mp4",
         "description": "Hello this is a video uploaded via you-up."
     }
 ]
