@@ -96,21 +96,12 @@ func saveClientSecret(sourceFile string) {
 
 	//Read the file
 	input, err := ioutil.ReadFile(sourceFile)
-	handleError(err, "Cannot read the file")
+	HandleError(err, "Cannot read the file")
 
 	// Save the file
 	err = ioutil.WriteFile(destinationFile, input, 0644)
-	handleError(err, "Error creating "+destinationFile)
+	HandleError(err, "Error creating "+destinationFile)
 
-}
-
-func handleError(err error, message string) {
-	if message == "" {
-		message = "Error making API call"
-	}
-	if err != nil {
-		log.Fatalf(message+": %v", err.Error())
-	}
 }
 
 func authenticate() *http.Client {

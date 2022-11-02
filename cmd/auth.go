@@ -1,6 +1,3 @@
-/*
-Copyright © 2022 NAME HERE <EMAIL ADDRESS>
-*/
 package cmd
 
 import (
@@ -18,7 +15,8 @@ var authCmd = &cobra.Command{
 	Short: "Authenticate to your google service",
 	Long:  `Authenticate to your google service. To use the application you need to download "client_secrets.json" from the YouTube Data API (v3).`,
 	Run: func(cmd *cobra.Command, args []string) {
-		filename, _ := cmd.Flags().GetString("filename")
+		filename, err := cmd.Flags().GetString("filename")
+		controller.HandleError(err, "Unable to read file")
 		usrHomeDir := controller.GetHomeDir()
 		clientSecretPath := filepath.Join(usrHomeDir, ".credentials", "client_secret.json")
 		if _, err := os.Stat(clientSecretPath); err == nil {

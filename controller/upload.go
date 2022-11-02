@@ -46,7 +46,7 @@ func upload(service *youtube.Service, video *Video) {
 	}
 
 	response, err := call.Media(file).Do()
-	handleError(err, "")
+	HandleError(err, "")
 	url := "https://www.youtube.com/watch?v=" + response.Id
 	fmt.Printf("Upload successful! Video ID: %v\n", url)
 }
@@ -54,7 +54,7 @@ func upload(service *youtube.Service, video *Video) {
 func UploadVideo(video *Video) {
 	client := authenticate()
 	service, err := youtube.New(client)
-	handleError(err, "Error creating YouTube client")
+	HandleError(err, "Error creating YouTube client")
 	upload(service, video)
 }
 

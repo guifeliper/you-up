@@ -1,6 +1,3 @@
-/*
-Copyright © 2022 NAME HERE <EMAIL ADDRESS>
-*/
 package cmd
 
 import (
@@ -16,13 +13,20 @@ var uploadCmd = &cobra.Command{
 	Short: "Upload video to youtube",
 	Long:  `This command enable the upload of videos to youtube via your terminal.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		filename, _ := cmd.Flags().GetString("filename")
-		title, _ := cmd.Flags().GetString("title")
-		description, _ := cmd.Flags().GetString("description")
-		category, _ := cmd.Flags().GetString("category")
-		keywords, _ := cmd.Flags().GetString("keywords")
-		privacy, _ := cmd.Flags().GetString("privacy")
-		multiple, _ := cmd.Flags().GetBool("multiple")
+		filename, err := cmd.Flags().GetString("filename")
+		controller.HandleError(err, "Cannot read the filename")
+		title, err := cmd.Flags().GetString("title")
+		controller.HandleError(err, "Cannot read the filename")
+		description, err := cmd.Flags().GetString("description")
+		controller.HandleError(err, "Cannot read the description")
+		category, err := cmd.Flags().GetString("category")
+		controller.HandleError(err, "Cannot read the category")
+		keywords, err := cmd.Flags().GetString("keywords")
+		controller.HandleError(err, "Cannot read the keywords")
+		privacy, err := cmd.Flags().GetString("privacy")
+		controller.HandleError(err, "Cannot read the privacy")
+		multiple, err := cmd.Flags().GetBool("multiple")
+		controller.HandleError(err, "Cannot read the multiple")
 
 		if multiple {
 			controller.BulkUpload(filename)
