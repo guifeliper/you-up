@@ -7,17 +7,39 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net"
 	"net/http"
 	"net/url"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 
 	"golang.org/x/net/context"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/youtube/v3"
 )
+
+// startWebServer starts a web server that listens on http://localhost:8080.
+// The webserver waits for an oauth code in the three-legged auth flow.
+func startWebServer() (codeCh chan string, err error) {
+	listener, err := net.Listen("tcp", "localhost:8090")
+	if err != nil {
+		return nil, err
+	}
+	codeCh = make(chan string)
+
+	go http.Serve(listener, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		code := r.FormValue("code")
+		codeCh <- code // send code to OAuth flow
+		listener.Close()
+		w.Header().Set("Content-Type", "text/plain")
+		fmt.Fprintf(w, "Received code: %v\r\nYou can now safely close this browser window.", code)
+	}))
+
+	return codeCh, nil
+}
 
 // getClient uses a Context and Config to retrieve a Token
 // then generate a Client. It returns the generated Client.
@@ -34,20 +56,46 @@ func getClient(ctx context.Context, config *oauth2.Config) *http.Client {
 // getTokenFromWeb uses Config to request a Token.
 // It returns the retrieved Token.
 func getTokenFromWeb(config *oauth2.Config) *oauth2.Token {
+	codeCh, err := startWebServer()
+	if err != nil {
+		log.Fatalf("Unable to start a web server.")
+	}
 	authURL := config.AuthCodeURL("state-token", oauth2.AccessTypeOffline)
-	fmt.Printf("Go to the following link in your browser then type the "+
-		"authorization code: \n%v\n", authURL)
-	exec.Command("open", authURL).Start()
-	var code string
-	if _, err := fmt.Scan(&code); err != nil {
-		log.Fatalf("Unable to read authorization code %v", err)
+	err = openURL(authURL)
+	if err != nil {
+		log.Fatalf("Unable to open authorization URL in web server: %v", err)
+	} else {
+		fmt.Println("Your browser has been opened to an authorization URL.",
+			" This program will resume once authorization has been provided.\n")
+		fmt.Println(authURL)
 	}
 
+	// Wait for the web server to get the code.
+	code := <-codeCh
 	tok, err := config.Exchange(oauth2.NoContext, code)
 	if err != nil {
 		log.Fatalf("Unable to retrieve token from web %v", err)
 	}
 	return tok
+}
+
+// openURL opens a browser window to the specified location.
+// This code originally appeared at:
+//
+//	http://stackoverflow.com/questions/10377243/how-can-i-launch-a-process-that-is-not-a-file-in-go
+func openURL(url string) error {
+	var err error
+	switch runtime.GOOS {
+	case "linux":
+		err = exec.Command("xdg-open", url).Start()
+	case "windows":
+		err = exec.Command("rundll32", "url.dll,FileProtocolHandler", "http://localhost:4001/").Start()
+	case "darwin":
+		err = exec.Command("open", url).Start()
+	default:
+		err = fmt.Errorf("Cannot open URL %s on this platform", url)
+	}
+	return err
 }
 
 // tokenCacheFile generates credential file path/filename.
@@ -117,6 +165,11 @@ func authenticate() *http.Client {
 	if err != nil {
 		log.Fatalf("Unable to parse client secret file to config: %v", err)
 	}
+
+	// Use a redirect URI like this for a web app. The redirect URI must be a
+	// valid one for your OAuth2 credentials.
+	config.RedirectURL = "http://localhost:8090"
+
 	client := getClient(ctx, config)
 
 	return client
